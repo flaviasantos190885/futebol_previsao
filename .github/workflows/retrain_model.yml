@@ -3,11 +3,11 @@ name: Retrain ML Model and Update Data
 on:
   schedule:
     # Opção para rodar a cada 15 minutos (para testes)
-    - cron: '*/15 * * * *'
+    #- cron: '*/15 * * * *'
     # Opção para rodar a cada hora (descomente para usar)
     # - cron: '0 * * * *'
     # Opção para rodar uma vez por dia (descomente para usar)
-    # - cron: '0 0 * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:
     # Permite rodar o workflow manualmente na aba "Actions" do GitHub
 
