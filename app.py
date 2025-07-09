@@ -95,7 +95,7 @@ st.markdown("Por favor, **escolha um Time Mandante e um Time Visitante (obrigat�
 def load_trained_model():
     """Carrega o modelo de Machine Learning treinado."""
     try:
-        model_path = os.path.join("model", "modelo-final")
+        model_path = os.path.join("model/brasileirao_classificacao")
         if not os.path.exists(f"{model_path}.pkl"):
             st.error(f"Erro: O arquivo do modelo '{model_path}.pkl' não foi encontrado. Certifique-se de que ele está no caminho correto.")
             st.stop()
