@@ -13,7 +13,8 @@ import re
 import unicodedata
 import sqlite3
 import os
-from pycaret.classification import setup, create_model, tune_model, finalize_model, save_model, compare_models
+# Removido 'compare_models' da importação, pois não será mais usado diretamente
+from pycaret.classification import setup, create_model, tune_model, finalize_model, save_model
 import random # Importar para geração de dados randômicos
 from datetime import datetime, timedelta # Importar para datas randômicas
 
@@ -34,7 +35,7 @@ os.makedirs(model_path, exist_ok=True)
 db_producao_path = os.path.join(data_path, "futebol_prod.db")
 db_futebol_dw_path = os.path.join(data_path, "futebol_dw.db")
 # Este CSV será usado como base para obter valores únicos para dados randômicos
-source_csv_for_extract = os.path.join(data_path, "BRA_brasileirao_final.csv")
+source_csv_for_extract = os.path.join(data_path, "BRA_brasileirao_tratado.csv")
 # Este CSV será o resultado final do tratamento para debug/verificação
 treated_csv_output = os.path.join(data_path, "BRA_brasileirao_tratado_final.csv")
 
@@ -251,6 +252,11 @@ def _transform():
 
         df_tratado = df_raw.copy()
 
+        # Renomear colunas para consistência (se necessário, baseado no seu CSV original)
+        # As colunas já devem estar slugified da etapa de extração, mas podemos renomear aqui
+        # se os nomes do DB forem diferentes dos esperados pelo tratamento.
+        # df_tratado.rename(columns={...}, inplace=True) # Exemplo: se o DB tivesse nomes diferentes
+
         # Aplica as funções de tratamento
         df_tratado = create_result_column(df_tratado)
         df_tratado = apply_desempate_logic(df_tratado)
@@ -324,13 +330,14 @@ def _train_and_save_model():
         )
         print("Ambiente PyCaret configurado.")
 
-        # Comparar modelos e selecionar o melhor
-        print("Comparando modelos (pode levar alguns minutos)...")
-        best_model = compare_models(fold=5, sort='Accuracy')
-        print(f"Melhor modelo encontrado: {best_model}")
+        # Otimizado: Cria e finaliza o modelo LightGBM diretamente, sem comparar
+        print("Criando e finalizando o modelo LightGBM...")
+        lgbm = create_model('lightgbm', verbose=False) # Crie o modelo LightGBM
+        # Opcional: tunar o modelo se desejar, mas para agilizar, podemos pular esta etapa
+        # tuned_lgbm = tune_model(lgbm, optimize='Accuracy', verbose=False)
+        final_model = finalize_model(lgbm) # Finaliza o modelo criado (ou tunado)
+        print("Modelo LightGBM criado e finalizado.")
 
-        # Finalizar e salvar o modelo
-        final_model = finalize_model(best_model)
         save_model(final_model, os.path.join(model_path, "modelo-final"))
         print(f"Modelo salvo em '{os.path.join(model_path, 'modelo-final.pkl')}'.")
 
